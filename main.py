@@ -5,7 +5,7 @@ WORLD_WIDTH = 800
 WORLD_HEIGHT = 600
 
 
-# dirt = 1, water = 2, grass = 3
+# dirt = 1, water = 2, grass = 3, black = 4, white = 5
 class Display:
     def __init__(self):
         self.root = Tk()
@@ -21,16 +21,21 @@ class Display:
 
     def draw_game(self):
         self.canvas.create_rectangle(0, 0, WORLD_WIDTH, WORLD_HEIGHT)
-        for idx, i in enumerate(self.world.object):
-            for jidx, j in enumerate(i):
+        for i_idx, i in enumerate(self.world.object):
+            for j_idx, j in enumerate(i):
                 if j == 1:
-                    self.canvas.create_rectangle(jidx * 25, idx * 25, jidx * 25 + 25, idx * 25 + 25, fill="brown")
+                    self.canvas.create_rectangle(j_idx * 25, i_idx * 25, j_idx * 25 + 25, i_idx * 25 + 25, fill="brown")
                 elif j == 2:
-                    self.canvas.create_rectangle(jidx * 25, idx * 25, jidx * 25 + 25, idx * 25 + 25, fill="blue")
+                    self.canvas.create_rectangle(j_idx * 25, i_idx * 25, j_idx * 25 + 25, i_idx * 25 + 25, fill="blue")
                 elif j == 3:
-                    self.canvas.create_rectangle(jidx * 25, idx * 25, jidx * 25 + 25, idx * 25 + 25, fill="green")
+                    self.canvas.create_rectangle(j_idx * 25, i_idx * 25, j_idx * 25 + 25, i_idx * 25 + 25, fill="green")
+                elif j == 4:
+                    self.canvas.create_rectangle(j_idx * 25, i_idx * 25, j_idx * 25 + 25, i_idx * 25 + 25, fill="black")
+                elif j == 5:
+                    self.canvas.create_rectangle(j_idx * 25, i_idx * 25, j_idx * 25 + 25, i_idx * 25 + 25, fill="white")
         self.canvas.create_oval(self.world.player.x * 25, self.world.player.y * 25, self.world.player.x * 25 + 25,
                                 self.world.player.y * 25 + 25, fill="white")
+        self.canvas.create_text(WORLD_WIDTH / 2, WORLD_HEIGHT + 50, text=self.world.player.get_inventory())
 
     def key_press(self, event):
         if event.keysym == "w":
@@ -49,6 +54,12 @@ class Display:
             self.world.place(2)
         elif event.keysym == "3":
             self.world.place(3)
+        elif event.keysym == "4":
+            self.world.place(4)
+        elif event.keysym == "5":
+            self.world.place(5)
+        elif event.keysym == "t":
+            self.world.player.craft(5)
         else:
             print("Invalid Input")
 
@@ -73,9 +84,11 @@ class World:
                 temp.append(1)
             self.object.append(temp)
         for i in range(random.randint(250, 350)):
-                self.object[random.randint(0, 23)][random.randint(0, 31)] = 3
+            self.object[random.randint(0, 23)][random.randint(0, 31)] = 3
         for i in range(random.randint(50, 100)):
             self.object[random.randint(0, 23)][random.randint(0, 31)] = 2
+        for i in range(random.randint(20, 30)):
+            self.object[random.randint(0, 23)][random.randint(0, 31)] = 4
 
     def pick(self):
         self.player.pick(self.object[self.player.y][self.player.x])
@@ -95,17 +108,17 @@ class Player:
         self.height = int(WORLD_HEIGHT / 25)
         self.x = random.randint(0, 31)
         self.y = random.randint(0, 23)
-        # [dirt, water, grass]
-        self.inventory = [0, 0, 0]
+        # [dirt, water, grass, black, white]
+        self.inventory = [0, 0, 0, 0, 0]
 
     def change_direction(self, direction):
-        if direction == "Up":
+        if direction == "Up" and self.y > 0:
             self.y = self.y - 1
-        elif direction == "Down":
+        elif direction == "Down" and self.y < self.height - 1:
             self.y = self.y + 1
-        elif direction == "Left":
+        elif direction == "Left" and self.x > 0:
             self.x = self.x - 1
-        elif direction == "Right":
+        elif direction == "Right" and self.x < self.width - 1:
             self.x = self.x + 1
 
     def pick(self, num):
@@ -116,6 +129,15 @@ class Player:
             self.inventory[num - 1] -= 1
             return True
         return False
+
+    def get_inventory(self):
+        return "Dirt: " + str(self.inventory[0]) + ", Water: " + str(self.inventory[1]) + ", Grass: " \
+               + str(self.inventory[2]) + ", Black: " + str(self.inventory[3]) + ", White: " + str(self.inventory[4])
+
+    def craft(self, num):
+        if num == 5 and self.inventory[3] >= 2:
+            self.inventory[3] -= 2
+            self.inventory[4] += 1
 
 
 if __name__ == "__main__":

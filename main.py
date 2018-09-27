@@ -5,7 +5,7 @@ WORLD_WIDTH = 800
 WORLD_HEIGHT = 600
 
 
-# dirt = 1, water = 2, grass = 3, black = 4, white = 5
+# dirt = 1, water = 2, grass = 3, wood = 4, plank = 5
 class Display:
     def __init__(self):
         self.root = Tk()
@@ -13,6 +13,12 @@ class Display:
         self.canvas.pack()
         self.world = World()
         self.root.bind("<KeyPress>", self.key_press)
+        self.dirt = PhotoImage(file="images/dirt.gif")
+        self.water = PhotoImage(file="images/water.gif")
+        self.grass = PhotoImage(file="images/grass.gif")
+        self.wood = PhotoImage(file="images/wood.gif")
+        self.plank = PhotoImage(file="images/plank.gif")
+        self.player_image = PhotoImage(file="images/player.gif")
 
     def start(self):
         self.world.start()
@@ -24,17 +30,16 @@ class Display:
         for i_idx, i in enumerate(self.world.object):
             for j_idx, j in enumerate(i):
                 if j == 1:
-                    self.canvas.create_rectangle(j_idx * 25, i_idx * 25, j_idx * 25 + 25, i_idx * 25 + 25, fill="brown")
+                    self.canvas.create_image(j_idx * 25, i_idx * 25, image=self.dirt, anchor="nw")
                 elif j == 2:
-                    self.canvas.create_rectangle(j_idx * 25, i_idx * 25, j_idx * 25 + 25, i_idx * 25 + 25, fill="blue")
+                    self.canvas.create_image(j_idx * 25, i_idx * 25, image=self.water, anchor="nw")
                 elif j == 3:
-                    self.canvas.create_rectangle(j_idx * 25, i_idx * 25, j_idx * 25 + 25, i_idx * 25 + 25, fill="green")
+                    self.canvas.create_image(j_idx * 25, i_idx * 25, image=self.grass, anchor="nw")
                 elif j == 4:
-                    self.canvas.create_rectangle(j_idx * 25, i_idx * 25, j_idx * 25 + 25, i_idx * 25 + 25, fill="black")
+                    self.canvas.create_image(j_idx * 25, i_idx * 25, image=self.wood, anchor="nw")
                 elif j == 5:
-                    self.canvas.create_rectangle(j_idx * 25, i_idx * 25, j_idx * 25 + 25, i_idx * 25 + 25, fill="white")
-        self.canvas.create_oval(self.world.player.x * 25, self.world.player.y * 25, self.world.player.x * 25 + 25,
-                                self.world.player.y * 25 + 25, fill="white")
+                    self.canvas.create_image(j_idx * 25, i_idx * 25, image=self.plank, anchor="nw")
+        self.canvas.create_image(self.world.player.x * 25, self.world.player.y * 25, image=self.player_image, anchor="nw")
         self.canvas.create_text(WORLD_WIDTH / 2, WORLD_HEIGHT + 50, text=self.world.player.get_inventory())
 
     def key_press(self, event):
@@ -108,7 +113,7 @@ class Player:
         self.height = int(WORLD_HEIGHT / 25)
         self.x = random.randint(0, 31)
         self.y = random.randint(0, 23)
-        # [dirt, water, grass, black, white]
+        # [dirt, water, grass, wood, plank]
         self.inventory = [0, 0, 0, 0, 0]
 
     def change_direction(self, direction):
@@ -132,12 +137,12 @@ class Player:
 
     def get_inventory(self):
         return "Dirt: " + str(self.inventory[0]) + ", Water: " + str(self.inventory[1]) + ", Grass: " \
-               + str(self.inventory[2]) + ", Black: " + str(self.inventory[3]) + ", White: " + str(self.inventory[4])
+               + str(self.inventory[2]) + ", Wood: " + str(self.inventory[3]) + ", Plank: " + str(self.inventory[4])
 
     def craft(self, num):
-        if num == 5 and self.inventory[3] >= 2:
-            self.inventory[3] -= 2
-            self.inventory[4] += 1
+        if num == 5 and self.inventory[3] >= 1:
+            self.inventory[3] -= 1
+            self.inventory[4] += 4
 
 
 if __name__ == "__main__":
